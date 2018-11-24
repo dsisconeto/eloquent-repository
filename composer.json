@@ -1,0 +1,18 @@
+{
+    "name": "dsisconeto/eloquent-repository",
+    "description": "Eloquent Repository",
+    "keywords": [
+        "repository",
+        "eloquent"
+    ],
+    "license": "MIT",
+    "type": "library",
+    "require": {
+        "php": ">=7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "DSisconeto\\EloquentRepository\\": "src/"
+        }
+    }
+}
