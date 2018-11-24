@@ -9,39 +9,39 @@ namespace DSisconeto\EloquentRepository;
 interface RepositoryInterface
 {
     /**
-     * @param $entity
+     * @param object|mixed $entity
      */
-    public function store($entity): void;
+    public function store(object $entity): void;
 
     /**
-     * @param $entity
+     * @param object|mixed $entity
      */
-    public function update($entity): void;
+    public function update(object $entity): void;
 
     /**
-     * @param $primaryKey
+     * @param string $key
      */
-    public function delete($primaryKey): void;
+    public function delete(string $key): void;
 
     /**
-     * @param $primaryKey
+     * @param string $key
      * @param array $includes
      * @return null|object|mixed
      */
-    public function findById($primaryKey, $includes = []): ?object;
+    public function findById(string $key, array $includes = []): ?object;
 
     /**
      * @param array $includes
      * @param array $order
      * @return \ArrayObject
      */
-    public function findAll($includes = [], $order = []): \ArrayObject;
+    public function findAll(array $includes = [], array $order = []): \ArrayObject;
 
     /**
-     * @param $primaryKey
+     * @param string $key
      * @return bool
      */
-    public function has($primaryKey): bool;
+    public function has(string $key): bool;
 
     /**
      * @return int

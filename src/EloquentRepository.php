@@ -2,7 +2,6 @@
 
 namespace DSisconeto\EloquentRepository;
 
-
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -14,44 +13,44 @@ class EloquentRepository implements RepositoryInterface
     /**
      * @var AbstractMapper
      */
-    private $model;
+    private $mapper;
 
     /**
      * EloquentRepository constructor.
-     * @param AbstractMapper $model
+     * @param AbstractMapper $mapper
      */
-    public function __construct(AbstractMapper $model)
+    public function __construct(AbstractMapper $mapper)
     {
-        $this->model = $model;
+        $this->mapper = $mapper;
     }
 
     /**
-     * @param $entity
+     * @param mixed|object $entity
      */
-    public function store($entity): void
+    public function store(object $entity): void
     {
-        $this->factoryModel($entity)->save();
+        $this->toMapper($entity, false)->save();
     }
 
     /**
-     * @param $entity
+     * @param mixed|object $entity
      */
-    public function update($entity): void
+    public function update(object $entity): void
     {
-        $this->factoryModel($entity)->update();
+        $this->toMapper($entity, true)->update();
     }
 
     /**
-     * @param $primaryKey
+     * @param string $key
      * @param array $includes
      * @return null|object
      */
-    public function findById($primaryKey, $includes = []): ?object
+    public function findById(string $key, array $includes = []): ?object
     {
         /**
          * @var AbstractMapper $model
          */
-        $model = $this->model->newQuery()->with($includes)->find($primaryKey);
+        $model = $this->mapper->newQuery()->with($includes)->find($key);
 
         return is_null($model) ? null : $model->toEntity();
     }
@@ -61,68 +60,24 @@ class EloquentRepository implements RepositoryInterface
      * @param array $order
      * @return \ArrayObject
      */
-    public function findAll($includes = [], $order = []): \ArrayObject
+    public function findAll(array $includes = [], array $order = []): \ArrayObject
     {
-        $query = $this->model->newQuery()->with($includes);
+        $query = $this->mapper->newQuery()->with($includes);
 
         if (array_key_exists(0, $order) && array_key_exists(1, $order)) {
             $query->orderBy($order[0], $order[1]);
         }
 
-        return $this->factoryEntityByCollection($query->get());
+        return $this->toEntities($query->get());
     }
 
     /**
-     * @param $primaryKey
+     * @param string $key
      * @return bool
      */
-    public function has($primaryKey): bool
+    public function has(string $key): bool
     {
-        return $this->query()->where($this->model->getKeyName(), "=", $primaryKey)->exists();
-    }
-
-    /**
-     * @param $primaryKey
-     * @throws \Exception
-     */
-    public function delete($primaryKey): void
-    {
-        $this->factoryModel([$this->model->getKeyName() => $primaryKey])->delete();
-    }
-
-
-    /**
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function query()
-    {
-        return $this->model->newQuery();
-    }
-
-    /**
-     * @param $entity
-     * @return AbstractMapper
-     */
-    public function factoryModel($entity): AbstractMapper
-    {
-        return $this->model->newInstance($this->model->toAttributes($entity), true);
-    }
-
-    /**
-     * @param Collection $collection
-     * @return \ArrayObject
-     */
-    public function factoryEntityByCollection(Collection $collection): \ArrayObject
-    {
-        $array = new \ArrayObject();
-        /**
-         * @var AbstractMapper $model
-         */
-        foreach ($collection as $model) {
-            $array->append($model->toEntity());
-        }
-
-        return $array;
+        return $this->query()->where($this->mapper->getKeyName(), "=", $key)->exists();
     }
 
     /**
@@ -131,5 +86,56 @@ class EloquentRepository implements RepositoryInterface
     public function count(): int
     {
         return $this->query()->count();
+    }
+
+    /**
+     * @param string $key
+     * @throws \Exception
+     */
+    public function delete(string $key): void
+    {
+        $this->newInstance([$this->mapper->getKeyName() => $key], true)->delete();
+    }
+
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function query()
+    {
+        return $this->mapper->newQuery();
+    }
+
+    /**
+     * @param object $entity
+     * @param bool $exists
+     * @return AbstractMapper
+     */
+    public function toMapper(object $entity, bool $exists): AbstractMapper
+    {
+        return $this->newInstance($this->mapper->toAttributes($entity), $exists);
+    }
+
+    public function newInstance(array $attributes, bool $exists): AbstractMapper
+    {
+        return $this->mapper->newInstance($attributes, $exists);
+    }
+
+    /**
+     * @param Collection $collection
+     * @return \ArrayObject
+     */
+    public function toEntities(Collection $collection): \ArrayObject
+    {
+        $array = new \ArrayObject();
+        /**
+         * @var AbstractMapper $model
+         */
+
+        foreach ($collection as $model) {
+            $array->append($model->toEntity());
+        }
+
+        return $array;
     }
 }

@@ -2,7 +2,6 @@
 
 namespace DSisconeto\EloquentRepository;
 
-
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -11,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 abstract class AbstractMapper extends Model
 {
+    protected $primaryKey = 'id';
     /**
      * @var array
      */
@@ -19,9 +19,13 @@ abstract class AbstractMapper extends Model
      * @var string
      */
     protected $keyType = 'string';
+    /**
+     * @var bool
+     */
+    public $incrementing = false;
 
     /**
-     * @return object
+     * @return object|mixed
      */
     abstract public function toEntity(): object;
 
